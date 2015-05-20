@@ -7,6 +7,31 @@
 {.deadCodeElim: on.}
 
 
+when defined(linux):
+  when defined(debug):
+    const dllname = "libsixensed_x64.so"
+  else:
+    const dllname = "libsixense_x64.so"
+elif defined(mac):
+  when defined(debug):
+    const dllname = "libsixensed_x64.dylib"
+  else:
+    const dllname = "libsixense_x64.dylib"
+elif defined(windows):
+  when defined(win64):
+    when defined(debug):
+      const dllname = "sixensed_x64.dll"
+    else:
+      const dllname = "sixense_x64.dll"
+  else:
+    when defined(debug):
+      const dllname = "sixensed.dll"
+    else:
+      const dllname = "sixense.dll"
+else:
+  {.error: "Platform does not support sixense".}
+
+
 const
   SIXENSE_BUTTON_BUMPER* = (0x00000001 shl 7)
     ## Bit mask for the bumper button.
@@ -67,7 +92,7 @@ type
     controllers*: array[4, SixenseControllerData]
 
 
-proc sixenseInit*(): cint {.importc.}
+proc sixenseInit*(): cint {.cdecl, dynlib: dllname, importc.}
   ## Initialize the Sixense library.
   ##
   ## result
@@ -78,7 +103,7 @@ proc sixenseInit*(): cint {.importc.}
   ## - `sixenseExit <#sixenseExit>`_
 
 
-proc sixenseExit*(): cint {.importc.}
+proc sixenseExit*(): cint {.cdecl, dynlib: dllname, importc.}
   ## Shut down the Sixense library.
   ##
   ## result
@@ -89,7 +114,7 @@ proc sixenseExit*(): cint {.importc.}
   ## - `sixenseInit <#sixenseInit >`_
 
 
-proc sixenseGetMaxBases*(): cint {.importc.}
+proc sixenseGetMaxBases*(): cint {.cdecl, dynlib: dllname, importc.}
   ## Return the maximum number of base units that can be connected to the
   ## computer at once.
   ##
@@ -98,7 +123,8 @@ proc sixenseGetMaxBases*(): cint {.importc.}
   ##   Currently, this number is `4` for all platforms.
 
 
-proc sixenseSetActiveBase*(baseNum: cint): cint {.importc.}
+proc sixenseSetActiveBase*(baseNum: cint): cint
+  {.cdecl, dynlib: dllname, importc.}
   ## Designate which base subsequent API calls are to be directed to.
   ##
   ## baseNum
@@ -108,7 +134,8 @@ proc sixenseSetActiveBase*(baseNum: cint): cint {.importc.}
   ##   - `SIXENSE_FAILURE` otherwise.
 
 
-proc sixenseIsBaseConnected*(baseNum: cint): cint {.importc.}
+proc sixenseIsBaseConnected*(baseNum: cint): cint
+  {.cdecl, dynlib: dllname, importc.}
   ## Determine if a base is currently connected to the system.
   ##
   ## baseNum
@@ -117,7 +144,7 @@ proc sixenseIsBaseConnected*(baseNum: cint): cint {.importc.}
   ##   `1` if the base is currently plugged in, and `0` otherwise
 
 
-proc sixenseGetMaxControllers*(): cint {.importc.}
+proc sixenseGetMaxControllers*(): cint {.cdecl, dynlib: dllname, importc.}
   ## Return the maximum number of controllers supported by the Sixense control
   ## system.
   ##
@@ -126,7 +153,8 @@ proc sixenseGetMaxControllers*(): cint {.importc.}
   ##   system. Currently, this number is `4` for all platforms.
 
 
-proc sixenseIsControllerEnabled*(which: cint): cint {.importc.}
+proc sixenseIsControllerEnabled*(which: cint): cint
+  {.cdecl, dynlib: dllname, importc.}
   ## Check if a referenced controller is currently connected to the Base Unit.
   ##
   ## which
@@ -138,7 +166,7 @@ proc sixenseIsControllerEnabled*(which: cint): cint {.importc.}
   ## - `sixenseGetMaxControllers <#sixenseGetMaxControllers>`_
 
 
-proc sixenseGetNumActiveControllers*(): cint {.importc.}
+proc sixenseGetNumActiveControllers*(): cint {.cdecl, dynlib: dllname, importc.}
   ## Report the number of active controllers.
   ##
   ## result
@@ -149,7 +177,7 @@ proc sixenseGetNumActiveControllers*(): cint {.importc.}
   ## - `sixenseIsControllerEnabled <#sixenseIsControllerEnabled>`_
 
 
-proc sixenseGetHistorySize*(): cint {.importc.}
+proc sixenseGetHistorySize*(): cint {.cdecl, dynlib: dllname, importc.}
   ## Get the size of the history buffer.
   ##
   ## result
@@ -163,7 +191,7 @@ proc sixenseGetHistorySize*(): cint {.importc.}
 
 
 proc sixenseGetData*(which: cint; indexBack: cint;
-  a4: ptr SixenseControllerData): cint {.importc.}
+  a4: ptr SixenseControllerData): cint {.cdecl, dynlib: dllname, importc.}
   ## Get state of one of the controllers, selecting how far back into a history
   ## of the last 10 updates.
   ##
@@ -186,7 +214,7 @@ proc sixenseGetData*(which: cint; indexBack: cint;
 
 
 proc sixenseGetAllData*(indexBack: cint; allData: ptr SixenseAllControllerData):
-  cint {.importc.}
+  cint {.cdecl, dynlib: dllname, importc.}
   ## Get state of all of the controllers, selecting how far back into a history
   ## of the last 10 updates.
   ##
@@ -203,7 +231,7 @@ proc sixenseGetAllData*(indexBack: cint; allData: ptr SixenseAllControllerData):
 
 
 proc sixenseGetNewestData*(which: cint; data: ptr SixenseControllerData): cint
-  {.importc.}
+  {.cdecl, dynlib: dllname, importc.}
   ## Get the most recent state of one of the controllers.
   ##
   ## which
@@ -221,7 +249,7 @@ proc sixenseGetNewestData*(which: cint; data: ptr SixenseControllerData): cint
 
 
 proc sixenseGetAllNewestData*(allData: ptr SixenseAllControllerData): cint
-  {.importc.}
+  {.cdecl, dynlib: dllname, importc.}
   ## Get the most recent state of all of the controllers.
   ##
   ## allData
@@ -232,15 +260,15 @@ proc sixenseGetAllNewestData*(allData: ptr SixenseAllControllerData): cint
 
 
 proc sixenseSetHemisphereTrackingMode*(whichController: cint; state: cint):
-  cint {.importc.}
+  cint {.cdecl, dynlib: dllname, importc.}
 
 
 proc sixenseGetHemisphereTrackingMode*(whichController: cint; state: ptr cint):
-  cint {.importc.}
+  cint {.cdecl, dynlib: dllname, importc.}
 
 
 proc sixenseAutoEnableHemisphereTracking*(whichController: cint): cint
-  {.importc.}
+  {.cdecl, dynlib: dllname, importc.}
   ## Enable Hemisphere Tracking when the controller is aiming at the base.
   ##
   ## whichController
@@ -254,7 +282,8 @@ proc sixenseAutoEnableHemisphereTracking*(whichController: cint): cint
   ## Sixense API Overivew for more information.
 
 
-proc sixenseSetHighPriorityBindingEnabled*(onOrOff: cint): cint {.importc.}
+proc sixenseSetHighPriorityBindingEnabled*(onOrOff: cint): cint
+  {.cdecl, dynlib: dllname, importc.}
   ## Enable and disable High Priority RF binding mode.
   ##
   ## onOrOff
@@ -267,7 +296,7 @@ proc sixenseSetHighPriorityBindingEnabled*(onOrOff: cint): cint {.importc.}
 
 
 proc sixenseGetHighPriorityBindingEnabled*(onOrOff: ptr cint): cint
-  {.importc.}
+  {.cdecl, dynlib: dllname, importc.}
   ## Return the current state of High Priority RF binding mode.
   ##
   ## onOrOff
@@ -281,7 +310,7 @@ proc sixenseGetHighPriorityBindingEnabled*(onOrOff: ptr cint): cint
 
 
 proc sixenseTriggerVibration*(controllerId: cint; duration100ms: cint;
-  patternId: cint): cint {.importc.}
+  patternId: cint): cint {.cdecl, dynlib: dllname, importc.}
   ## Enable a period of tactile feedback using the vibration motor.
   ##
   ## controllerId
@@ -301,7 +330,8 @@ proc sixenseTriggerVibration*(controllerId: cint; duration100ms: cint;
   ##   - `SIXENSE_FAILURE` otherwise.
 
 
-proc sixenseSetFilterEnabled*(onOrOff: cint): cint {.importc.}
+proc sixenseSetFilterEnabled*(onOrOff: cint): cint
+  {.cdecl, dynlib: dllname, importc.}
   ## Turn the internal position and orientation filtering on or off.
   ##
   ## onOrOff
@@ -314,7 +344,8 @@ proc sixenseSetFilterEnabled*(onOrOff: cint): cint {.importc.}
   ## - `sixenseGetFilterEnabled <#sixenseGetFilterEnabled>`_
 
 
-proc sixenseGetFilterEnabled*(onOrOff: ptr cint): cint {.importc.}
+proc sixenseGetFilterEnabled*(onOrOff: ptr cint): cint
+  {.cdecl, dynlib: dllname, importc.}
   ## Return the enable status of the internal position and orientation filtering.
   ##
   ## onOrOff
@@ -328,7 +359,7 @@ proc sixenseGetFilterEnabled*(onOrOff: ptr cint): cint {.importc.}
 
 
 proc sixenseSetFilterParams*(nearRange: cfloat; nearVal: cfloat;
-  farRange: cfloat; farVal: cfloat): cint {.importc.}
+  farRange: cfloat; farVal: cfloat): cint {.cdecl, dynlib: dllname, importc.}
   ## Set the parameters that control the position and orientation filtering
   ## level.
   ##
@@ -356,7 +387,8 @@ proc sixenseSetFilterParams*(nearRange: cfloat; nearVal: cfloat;
 
 
 proc sixenseGetFilterParams*(nearRange: ptr cfloat; nearVal: ptr cfloat;
-  farRange: ptr cfloat; farVal: ptr cfloat): cint {.importc.}
+  farRange: ptr cfloat; farVal: ptr cfloat): cint
+  {.cdecl, dynlib: dllname, importc.}
   ## Return the current filtering parameter values.
   ##
   ## nearRange
@@ -376,7 +408,7 @@ proc sixenseGetFilterParams*(nearRange: ptr cfloat; nearVal: ptr cfloat;
 
 
 proc sixenseSetBaseColor*(red: cuchar; green: cuchar; blue: cuchar): cint
-  {.importc.}
+  {.cdecl, dynlib: dllname, importc.}
   ## Sets the color of the LED on the Sixense wireless devkits.
   ##
   ## red
@@ -393,7 +425,7 @@ proc sixenseSetBaseColor*(red: cuchar; green: cuchar; blue: cuchar): cint
 
 
 proc sixenseGetBaseColor*(red: ptr cuchar; green: ptr cuchar; blue: ptr cuchar):
-  cint {.importc.}
+  cint {.cdecl, dynlib: dllname, importc.}
   ## Get the color of the LED on the Sixense wireless devkits.
   ##
   ## red
