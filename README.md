@@ -2,6 +2,8 @@
 
 Nim bindings for the Sixense Core API.
 
+![io-egl Logo](logo.png)
+
 
 ## About
 
@@ -13,12 +15,16 @@ Sixense-powered devices, such as the Razer Hydra and STEM System.
 
 ## Supported Platforms
 
-TODO
+The following platforms have been built and tested with **Sixense SDK 062612**:
+
+- ~~Linux~~
+- ~~Mac~~
+- Windows
 
 
 ## Prerequisites
 
-TODO
+Download and install the latest **Sixense SDK** for your platform.
 
 
 ## Dependencies
@@ -28,7 +34,12 @@ io-sixense does not have any dependencies to other Nim packages at this time.
 
 ## Usage
 
-TODO
+Import the *sixense* module from this package to make the bindings available
+in your project:
+
+```nimrod
+import sixense
+```
 
 
 ## Support
