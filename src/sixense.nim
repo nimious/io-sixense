@@ -1,4 +1,4 @@
-## *io-sixense* - Nim bindings for the Sixense Core API.
+## *sixense* - Nim bindings for the Sixense Core API.
 ##
 ## This file is part of the `Nim I/O <http://nimio.us>`_ package collection.
 ## See the file LICENSE included in this distribution for licensing details.
